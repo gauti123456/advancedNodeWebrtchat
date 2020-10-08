@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset=UTF-8"">
+<title>Node chat server</title>
+<link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+<script  type="text/javascript"  src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+<link href="/public/css/style.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+
+
+
+
+
+<style type="text/css">
+	.pic{
+		float:left;
+		margin-top:10%;
+		margin-left: 10%;
+		width:30%;
+	}
+	.edit{
+		display: none;
+	}
+	  dt {
+	    font-weight: bolder;
+	    display: inline-block;
+	    width: 4em;
+	  }
+
+	  dd {
+	    display: inline-block;
+	    margin-left: 0;
+	    line-height: 1.5;
+	  }
+
+	  ::-webkit-scrollbar
+	{
+	  width: 12px;  /* for vertical scrollbars */
+	  height: 12px; /* for horizontal scrollbars */
+	}
+
+	::-webkit-scrollbar-track
+	{
+	  background: rgba(0, 0, 0, 0.1);
+	}
+
+	::-webkit-scrollbar-thumb
+	{
+	  background: rgba(0, 0, 0, 0.5);
+	}
+
+	  .message{
+	  	background-color: #3274E1;
+	  	width:auto;
+	  	background: url('/public/b.jpg') center / cover;
+	  	max-height: 485px;
+	  	height:485px;
+	  	overflow-y: scroll;
+		overflow-x: hidden;
+		display:relative;
+	  }
+	  .friends{
+	  	max-height: 485px;
+	  	height:485px;
+	  	overflow-y: scroll;
+	overflow-x: hidden;
+	  }
+	.demo-card-wide.mdl-card {
+	  width: auto;
+	}
+	.demo-card-wide > .mdl-card__title {
+	  color: #000;
+	  
+	  
+	}
+	.demo-card-wide > .mdl-card__menu {
+	  color: #fff;
+	}
+	.typing_status
+	{
+		margin-top:40px;
+		position:absolute;
+		color:#98e266;
+		padding-left:20px;
+		font-style: italic;
+	}
+	.non_current
+	{
+		position:absolute;
+		font-size: 12px;
+		color:#08932a;
+		margin-top: -10px;
+		font-style: italic;
+	}
+	#emoji{
+		font-size: 20px;
+		margin-top: -370px;
+		display: none;
+		background:#fff;
+		height:400px;
+		width:80%;
+		padding:10px;
+		height: 300px;
+		border-radius: 15px;
+		position: absolute;
+		z-index: 1000;
+		overflow-y: scroll;
+		overflow-x: hidden;
+
+	}
+
+	#upload_container {
+	    position: absolute;
+	    font-size: 17px;
+	    padding: 15px;
+	    display: none;
+	    margin-top: -188px;
+	    border-radius: 21px;
+	    width: 180px;
+	    height: 124px;
+	    margin-left: 80%;
+	    background: snow;
+	    z-index: 11;
+	}
+	.upload_button {
+	    font-size: 0;
+	    padding: 21px;
+	    margin-top: 0;
+	    border-radius: 0;
+	    width: 0;
+	    height: 0;
+	    color: rgb(101, 31, 55);
+	    margin-left: -16px;
+	}
+	.popup_upload_container {
+	    position: absolute;
+	    margin-top: 4px;
+	}
+	#imgmsg_l {
+	    float: left;
+	    margin-bottom: 7px;
+	    clear: both;
+	    display: block;
+	    border: solid 4px #fff;
+	    border-radius: 7px;
+	}
+	#imgmsg_r {
+	    float: right;
+	    display:block;
+	    clear: both;
+	    border: solid 4px #fff;
+	    border-radius: 7px;
+	    margin-bottom: 7px;
+	}
+
+	.img_fetch {
+	    cursor: pointer;
+	    max-height: 250px;
+	    max-width: 250px;
+	}
+	.pdf_fetch {
+	    cursor: pointer;
+	    max-height: 450px;
+	    max-width: 300px;
+	}
+	.text_fetch_r{
+	    float: right;
+	    max-width: 400px;
+	    height: auto;
+	    clear: both;
+	    word-wrap: break-word;
+	    word-break: break-all;
+	    background-color: powderblue;
+	    padding: 6px;
+	    border-radius: 10px;
+	    color: #000;
+	    font-family: monospace;
+	    font-weight: 400;
+	}
+	.text_fetch_l {
+	    float: left;
+	    max-width: 400px;
+	    height: auto;
+	    clear: both;
+	    word-wrap: break-word;
+	    word-break: break-all;
+	    background-color: seashell;
+	    padding: 6px;
+	    border-radius: 10px;
+	    color: #000;
+	    font-family: monospace;
+	    font-weight: 400;
+	    padding-left: 20px;
+	}
+
+</style>
+</head>
+<body>
+
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer
+            mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+  
+	    <span class="mdl-layout-title friend_live" style="padding:20px">Please Choose friend to start chat on <b>ANAKSHIANT</b></span>
+	    <span class="typing_status"></span>
+
+    </header>
+  	<div class="mdl-layout__drawer">
+	    <span class="mdl-layout-title user_live">Title</span>
+	    <nav class="mdl-navigation friends">
+	    </nav>
+
+  	</div>
+
+    <main class="mdl-layout__content ">
+  		<div class="page-content">
+
+    	<!-- Your content goes here -->
+    	
+    	<div class="demo-card-wide mdl-card mdl-shadow--2dp">
+			<div class="mdl-card__supporting-text message">
+			    <!-- message  print here -->
+			    <div id="showimage"></div> 
+			</div>
+		
+		  	<div class="mdl-card__actions mdl-card--border">
+
+			  	<span class="status"></span>
+				<form id="form-submit">	
+						<button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored show_emoji_box" onmouseover="$('#emoji').show()">
+  							😃
+						</button>
+						<input  name="message_send" id="chat" class="emojiable-option " type="text"  style="width:92%;border:solid 1px gray;border-radius: 5px;height:30px;padding-left:10px;font-style:oblique;" placeholder="Type Your Message here" />
+						
+						<a class="upload_button">
+							<i class="material-icons popup_upload_container" onmouseover="$('#upload_container').show()">&#xE8F0;</i>
+						</a>
+						<div id="upload_container" onmouseover="$('#upload_container').show().css('cursor','pointer')" onmouseout="$(this).hide()">
+
+							<i class="material-icons add_item" style="font-size: 60px;margin-left: 20px;color: darkviolet;" onclick="show_file_uploader(1)">perm_media</i>
+
+							<i class="material-icons md-48" style="font-size: 60px;margin-left: 20px;color: steelblue;" onclick="show_file_uploader(2)" >library_music</i>
+
+							<i class="material-icons add_item" style="font-size: 60px;margin-left: 20px;color: yellowgreen;" onclick="show_file_uploader(3)">movie</i>
+
+							<i class="material-icons md-48" style="font-size: 60px;margin-left: 20px;" onclick="show_file_uploader(4)">recent_actors</i>
+						</div>
+						
+				</form>
+		<!-- //emoji -->
+				<div id="emoji" onmouseover="$('#emoji').show().css('cursor','pointer')" onmouseout="$('#emoji').hide()">
+						<b>😀</b><b>😃</b><b>😄</b><b>😁</b><b>😆</b><b>😅</b><b>😂</b><b>🤣</b><b>☺</b><b>😊</b><b>😇</b><b>🙂</b><b>🙃</b><b>😌</b><b>😍</b><b>😘</b><b>😗</b><b>😙</b><b>😚</b><b>😋</b><b>😜</b><b>😝</b><b>😛</b><b>🤑</b><b>🤗</b><b>🤓</b><b>😎</b><b>🤡</b><b>🤠</b><b>😏</b><b>😒</b><b>😞</b><b>😔</b><b>😟</b><b>😕</b><b>🙁</b><b>☹️</b><b>😣</b><b>😖</b><b>😫</b><b>😩</b><b>😤</b><b>😠</b><b>😡</b><b>😶</b><b>😐</b><b>😑</b><b>😯</b><b>😦</b><b>😧</b><b>😮</b><b>😲</b><b>😵 </b><b>😳</b><b>😱</b><b>😨</b><b>😰</b><b>😢</b><b>😥</b><b>🤤</b><b>😭</b><b>😓</b><b>😪</b><b>😴</b><b>🙄</b><b>🤔</b><b>🤥</b><b>😬</b><b>🤐</b><b>🤢</b><b>🤧</b><b>😷</b><b>🤒</b><b>🤕</b><b>😈</b><b>👿</b><b>👹</b><b>👺</b><b>💩</b><b>👻</b><b>💀</b><b>☠️</b><b>👽</b><b>👾</b><b>🤖</b><b>🎃</b><b>😺</b><b>😸</b><b>😹</b><b>😻</b><b>😼</b><b>😽</b><b>🙀</b><b>😿</b><b>😾</b><b>👐</b><b>🙌</b><b>👏</b><b>🙏</b><b>🤝</b><b>👍</b><b>👎</b><b>👊</b><b>✊</b><b>🤛</b><b>🤜</b><b>🤞</b><b>🤘</b><b>👌</b><b>👈</b><b>👉</b><b>👆</b><b>👇</b><b>🤚</b><b>🖐</b><b>🖖</b><b>👋</b><b>🤙</b><b>💪</b><b>🖕 </b><b>🤳</b><b>💅</b><b>🖖</b><b>💄</b><b>💋</b><b>👄</b><b>👅</b><b>👂</b><b>👃</b><b>👣</b><b>👁</b><b>👀</b><b>🗣</b><b>👤</b><b>👥</b><b>👶</b><b>👦</b><b>👧</b><b>👨</b><b>👩</b><b>👱‍♀️</b><b>👱</b><b>👴</b><b>👵</b><b>👲</b><b>👳‍♀️</b><b>👳</b><b>👮‍♀️</b><b>👮</b><b>👷‍♀️</b><b>👷</b><b>💂‍♀️</b><b> 💂</b><b>🕵️‍♀️</b><b>🕵️</b><b>👩‍⚕️</b><b>👨‍⚕️</b><b>👩‍🌾</b><b>👨‍🌾</b><b>👩‍🍳</b><b>👨‍🍳</b><b>👩‍🎓</b><b>👨‍🎓</b><b>👩‍🎤</b><b>👨‍🎤</b><b>👩‍🏫</b><b>👨‍🏫</b><b>👩‍🏭</b><b>👨‍🏭</b><b>👩‍💻</b><b>👨‍💻</b><b>👩‍💼</b><b>👨‍💼</b><b>👩‍🔧</b><b>👨‍🔧</b><b> 👩‍🔬</b><b> 👨‍🔬 </b><b>👩‍🎨</b><b> 👨‍🎨</b><b> 👩‍🚒 </b><b>👨‍🚒</b><b> 👩‍✈️</b><b> 👨‍✈️ </b><b>👩‍🚀</b><b> 👨‍🚀</b><b> 👩‍⚖️ </b><b>👨‍⚖️</b><b>🤶</b><b> 🎅 </b><b>👸 </b><b>🤴</b><b>👰</b><b>🤵</b><b>👼</b><b>🤰</b><b>🙇‍♀️ </b><b>🙇 </b><b>💁 </b><b>💁‍♂️ </b><b>🙅 </b><b>🙅‍♂️ </b><b>🙆 </b><b>🙆‍♂️</b><b> 🙋 </b><b>🙋‍♂️</b><b>🤦‍♀️</b><b>🤦‍♂️</b><b>🤷‍♀️</b><b>🤷‍♂️</b><b> 🙎 </b><b>🙎‍♂️ </b><b>🙍 </b><b>🙍‍♂️ </b><b>💇 </b><b>💇‍♂️ </b><b>💆 </b><b>💆‍♂️ </b><b>🕴</b><b> 💃</b><b> 🕺</b><b> 👯</b><b> 👯‍♂️</b><b> 🚶‍♀️</b><b> 🚶 </b><b>🏃‍♀️</b><b> 🏃 </b><b>👫 </b><b>👭</b><b> 👬</b><b> 💑</b><b> 👩‍❤️‍👩</b><b> 👨‍❤️‍👨</b><b> 💏</b><b> 👩‍❤️‍💋‍👩 </b><b>👨‍❤️‍💋‍👨 </b><b>👪</b><b> 👨‍👩‍👧</b><b> 👨‍👩‍👧‍👦</b><b> 👨‍👩‍👦‍👦</b><b> 👨‍👩‍👧‍👧</b><b> 👩‍👩‍👦</b><b> 👩‍👩‍👧 </b><b>👩‍👩‍👧‍👦</b><b> 👩‍👩‍👦‍👦 </b><b>👩‍👩‍👧‍👧</b><b> 👨‍👨‍👦 </b><b>👨‍👨‍👧</b><b> 👨‍👨‍👧‍👦</b><b> 👨‍👨‍👦‍👦</b><b> 👨‍👨‍👧‍👧</b><b> 👩‍👦</b><b> 👩‍👧</b><b> 👩‍👧‍👦</b><b> 👩‍👦‍👦 </b><b>👩‍👧‍👧 </b><b>👨‍👦</b><b> 👨‍👧</b><b> 👨‍👧‍👦</b><b> 👨‍👦‍👦 </b><b>👨‍👧‍👧</b><b> 👚</b><b> 👕</b><b> 👖</b><b> 👔 </b><b>👗</b><b> 👙</b><b> 👘</b><b> 👠</b><b> 👡</b><b> 👢</b><b> 👞</b><b> 👟</b><b> 👒</b><b> 🎩</b><b> 🎓</b><b> 👑</b><b> ⛑</b><b> 🎒</b><b> 👝</b><b> 👛</b><b> 👜</b><b> 💼</b><b> 👓</b><b> 🕶</b><b> 🌂</b><b> ☂️</b>	
+					</div>	
+				
+		  	</div>
+			
+		</div>
+	</div>
+  	</main>
+</div>
+<div id="demo-toast-example" class="mdl-js-snackbar mdl-snackbar">
+  <div class="mdl-snackbar__text"></div>
+  <button class="mdl-snackbar__action" type="button"></button>
+</div>
+
+
+<input type="file" id="sendimg" style="visibility: hidden;display:none">
+
+</body>
+</html>
+
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+<script type="text/javascript" src="socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/public/easyrtc.js"></script>
+    <script type="text/javascript" src="/public/demo_audio_only.js"></script>
+<script type="text/javascript" src="/public/js/delivery.js"></script>
+
+
+<script type="text/javascript">
+
+audio = new Audio('/public/capisci.mp3');
+socket = io.connect();
+name='';
+current_chat='';
+totaluser=[];
+type_data=null;
+
+
+	function show_file_uploader(key){
+
+		type_data=key;
+		document.getElementById('sendimg').click(); 
+
+		return false
+	}
+	function getEventTarget(e) {
+        e = e || window.event;
+        return e.target || e.srcElement; 
+    }
+
+    var ul = document.getElementById('emoji');
+    ul.onclick = function(event) {
+
+    	if(current_chat)
+        {var target = getEventTarget(event);
+        	
+        	
+        if(target.innerHTML.length<20)
+        document.getElementById("chat").value += target.innerHTML;
+		$('#chat').focus();}
+    	else
+    	{
+    	'use strict';
+ 			var snackbarContainer = document.querySelector('#demo-toast-example');
+    		var showToastButton = document.querySelector('#demo-show-toast');
+		    var data = {message: 'Please choose friend whom you want to send'};
+		    snackbarContainer.MaterialSnackbar.showSnackbar(data);
+		    	}
+    };
+
+
+//disable input box for type message
+$("#chat").attr('disabled','disabled');
+
+// create inter face for chat with friends
+function open_friend_chat(buddy)
+
+	{
+		// enable input box
+		$("#chat").removeAttr('disabled');
+		for ( var item in totaluser)
+		{	
+			$("#"+totaluser[item]).hide();
+			$('#'+totaluser[item]+'123').css({'background':'#fafafa','color':'#757575'});
+		}
+		console.log(buddy);
+		$('.friend_live').html(buddy);
+		$('#'+buddy+'pqrs').html('');
+		$('#'+buddy+'123').css({'background':'#164ca3','color':'white'});
+		$("#"+buddy).show();
+		current_chat=buddy;
+		$(".message").scrollTop(20000);
+
+	}
+
+jQuery(function($){
+			 
+// new user enter in chat group
+
+if (name=='')
+	{ 	name = prompt("Please enter your name(do not use spacial charecter)",);
+
+		
+
+		$('.user_live').html('Welcome '+name);
+		socket.emit('adduser',name);
+
+		socket.on('friend',function(data){
+			
+			if(data!=name)
+			{totaluser[totaluser.length+1]=data;
+			$('.friends').append('<a class="mdl-navigation__link" id="'+data+'123" onclick="open_friend_chat(`'+data+'`);" >'+data+'<i style="color:green" id="'+data+'pqrs"></i><br><i class="non_current non_current_user'+data+'"></i></a>');
+			$('.message').append('<div id="'+data+'"></div>');
+			$("#"+data).hide();}
+		})
+		socket.on('friends',function(data)
+		{	
+			var i=0;
+			for(var user in data)
+				{
+					
+					if(user!=name)
+					{	totaluser[i]=user;
+						i=i+1;
+						$('.friends').append('<a class="mdl-navigation__link" id="'+user+'123" onclick="open_friend_chat(`'+user+'`);" >'+user+'<i style="color:green" id="'+user+'pqrs"></i><br><i class="non_current non_current_user'+user+'"></i></a>');
+						$('.message').append('<div id="'+user+'"></div>');
+						$("#"+user).hide();
+					}
+				}
+				
+		});
+	}
+
+// end of new uswer entry
+
+		$("#chat").focus(function() {
+			data_chat={
+				"to":current_chat,
+				"from":name
+			};
+			socket.emit('send_user',data_chat);
+		}).blur(function() {
+			data_chat={
+				"to":current_chat,
+				"from":name};
+		    socket.emit('nosend_user',data_chat);
+		});
+
+// send message to friend
+
+			$('#form-submit').submit(function(e)
+			{	
+				e.preventDefault();	
+				if($('#chat').val())
+				{	console.log($('#chat').val());
+					data={
+						"from":name,
+						"to":current_chat,
+						"message":$('#chat').val()
+					};	
+					socket.emit('send_message',data);
+					$('#chat').val('');
+					$(".message").scrollTop(10000);
+					// user stop typing....
+						data_chat={
+										"to":current_chat,
+										"from":name
+									};
+					socket.emit('nosend_user',data_chat);
+				}
+			});
+// end of send message code
+
+			socket.on('new message',function(data){
+				
+				if(data.from==name)
+				{
+					msg='<p class="text_fetch_r">  '+ data.message +'</p>';
+				}
+				else
+				{	audio.play();	
+					msg='<p class="text_fetch_l">'+data.message+'</p>';}
+				
+					$('#'+data.to).append(""+msg);
+		
+					$('#'+data.from).append(""+msg);	
+					if(current_chat != data.from)
+					$('#'+data.from+'pqrs').html('(New message)');
+				$(".message").scrollTop(20000);
+				$(".friends").scrollTop(10000);
+			
+				});
+
+			socket.on('type_user',function(data)
+			{	
+				if(current_chat==data.from)
+					$('.typing_status').html('Typing...');
+				else
+				{
+					$('.non_current_user'+data.from).html('Typing...');
+					
+				}
+			});
+
+
+			socket.on('notype_user',function(data)
+			{	
+				if(current_chat==data.from)
+				$('.typing_status').html('');
+				else
+				{
+					$('.non_current_user'+data.from).html('');
+					
+				}
+			});
+
+
+
+		});
+
+// sending file to server
+$(function(){
+    socket.on('connect', function(){
+    var delivery = new Delivery(socket);
+ 	var set_flag = 0;
+    delivery.on('delivery.connect',function(delivery){
+      $("#sendimg").on('change',function(evt){
+      	
+        var file = $("#sendimg")[0].files[0];
+        console.log(file.type);
+        if(type_data == 1 && (file.type=='image/jpeg' || file.type=='image/jpg' || file.type=='image/gif' || file.type=='image/png' || file.type =='image/webp') )
+        {
+		set_flag=1	}
+		else if(type_data==2 && (file.type =='audio/mp3'|| file.type =='audio/wav'))
+		{
+		set_flag=1;
+		}
+		else if(type_data==3 && (file.type=='video/mp4' || file.type=='video/3gpp'|| file.type=='video/webm' || file.type=='video/wmb'))
+		{
+		set_flag=1;		
+		}
+		else if(type_data==4 && file.type=='application/pdf')
+			set_flag=1;
+		if(set_flag==0)
+			return false;
+		set_flag=0
+        var extraParams = {
+        	"to":current_chat,
+        	"from":name,
+        	"type_data":type_data
+    };
+        delivery.send(file, extraParams);
+        evt.preventDefault();
+      });
+    });
+
+
+
+ 	socket.on('image',function(image,buffer){
+ 		audio.play();
+ 		
+ 		if(image.datainfo.type_data == 1 )
+ 		{
+
+ 		// 	var blob = new Blob([buffer], {type: 'text/plain'})
+			// var dataUri = window.URL.createObjectURL(blob)
+
+ 		if(image.datainfo.to == name)
+ 			dataimg='<div id="imgmsg_l"><img class="img_fetch" src="data:image/jpeg;base64,'+image.buffer+'"/><//div><br>';
+ 		else 
+ 			dataimg='<div id="imgmsg_r"><img class="img_fetch" src="data:image/jpeg;base64,'+image.buffer+'"/></div><br>';
+ 			}
+
+ 		if(image.datainfo.type_data == 2 )
+ 		{
+ 		if(image.datainfo.to == name)
+ 			dataimg='<div id="imgmsg_l"><audio controls="controls" autobuffer="autobuffer" ><source src="data:audio/wav;base64,'+image.buffer+'" /></audio></div>';
+ 		else 
+ 			dataimg='<div id="imgmsg_r"><audio controls="controls" autobuffer="autobuffer" ><source src="data:audio/wav;base64,'+image.buffer+'" /></audio></div>';
+ 			}
+ 		if(image.datainfo.type_data == 3 )
+ 		{
+ 		if(image.datainfo.to == name)
+ 			dataimg='<div id="imgmsg_l"><video controls="controls" autobuffer="autobuffer" ><source src="data:video/webm;base64,'+image.buffer+'" /></video></div>';
+ 		else 
+ 			dataimg='<div id="imgmsg_r"><video controls="controls" autobuffer="autobuffer" ><source src="data:video/webm;base64,'+image.buffer+'" /></video></div>';
+ 			}	
+ 			if(image.datainfo.type_data==4)
+ 				{
+ 		if(image.datainfo.to == name)
+ 			dataimg='<a href="'+image.buffer+'" target="_blank"><div id="imgmsg_l"><embed id="pdf_fetch" width=100% height=100%  type="application/pdf" src="data:application/pdf;base64,'+image.buffer+'"></embed></div></a>';
+ 		else 
+ 			dataimg='<a href="'+image.buffer+'" target="_blank"><div id="imgmsg_r"><embed id="pdf_fetch" width=100% height=100%  type="application/pdf" src="data:application/pdf;base64,'+image.buffer+'"></embed></div></a>';
+ 			}
+ 
+
+ 		$('#'+image.datainfo.to).append(""+dataimg);
+		$('#'+image.datainfo.from).append(""+dataimg);	
+		if(current_chat != image.datainfo.from)
+		$('#'+image.datainfo.from+'pqrs').html('(New message)');
+		$(".message").scrollTop(20000);
+		$(".friends").scrollTop(10000);
+ 	});
+  });
+});
+
+
+
+
+$(".message").scrollTop(20000);
+$(".friends").scrollTop(20000);
+
+</script>
+
